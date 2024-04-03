@@ -1,0 +1,68 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload</title>
+    <style>
+        #drop-area {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin: 20px auto;
+            width: 50%;
+        }
+        img {
+            max-width: 100px;
+            max-height: 100px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="drop-area">
+        <h3>Drag and Drop Images Here</h3>
+    </div>
+    <script>
+        let dropArea = document.getElementById('drop-area');
+
+        dropArea.addEventListener('dragover', function(event) {
+            event.preventDefault();
+            dropArea.style.border = '2px dashed #aaa';
+        });
+
+        dropArea.addEventListener('dragleave', function(event) {
+            event.preventDefault();
+            dropArea.style.border = '2px dashed #ccc';
+        });
+
+        dropArea.addEventListener('drop', function(event) {
+            event.preventDefault();
+            dropArea.style.border = '2px dashed #ccc';
+            let files = event.dataTransfer.files;
+            let formData = new FormData();
+
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i];
+                formData.append('files[]', file);
+                let reader = new FileReader();
+                reader.onload = function(event) {
+                    let img = document.createElement('img');
+                    img.src = event.target.result;
+                    dropArea.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
